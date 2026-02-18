@@ -99,17 +99,6 @@
                     android:layout_marginTop="4dp" />
 
                 <!-- Edit Avatar Button -->
-                <TextView
-                    android:id="@+id/editAvatarButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Edit Avatar →"
-                    android:textColor="@color/navy_blue"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="16dp"
-                    android:clickable="true"
-                    android:focusable="true" />
 
             </LinearLayout>
 

@@ -1,7 +1,5 @@
 package com.mobdev.baonbuddy.ui.main
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,15 +7,22 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mobdev.baonbuddy.R
-import com.mobdev.baonbuddy.data.models.Transaction
 import com.mobdev.baonbuddy.ui.adapters.TransactionAdapter
+import com.mobdev.baonbuddy.ui.viewmodel.HomeViewModel
+import java.text.NumberFormat
+import java.util.Locale
 
 class HomeFragment : Fragment() {
+
+    private lateinit var viewModel: HomeViewModel
+    private lateinit var transactionAdapter: TransactionAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,105 +35,61 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val settingsButton = view.findViewById<ImageView>(R.id.settingsButton)
-        val addMoneyButton = view.findViewById<LinearLayout>(R.id.addMoneyButton)
-        val spentMoneyButton = view.findViewById<LinearLayout>(R.id.spentMoneyButton)
-        val setGoalsButton = view.findViewById<LinearLayout>(R.id.setGoalsButton)
-
-        // Settings button click
-        settingsButton.setOnClickListener {
-            val intent = Intent(requireContext(), com.mobdev.baonbuddy.ui.settings.SettingsActivity::class.java)
-            startActivity(intent)
-        }
-
-        // Add Money button click
-        addMoneyButton.setOnClickListener {
-            val intent = Intent(
-                requireContext(), com.mobdev.baonbuddy.ui.transactions.AddMoneyActivity::class.java)
-            startActivity(intent)
-        }
-
-        // Spent Money button click
-        spentMoneyButton.setOnClickListener {
-            val intent = Intent(requireContext(), com.mobdev.baonbuddy.ui.transactions.SpentMoneyActivity::class.java)
-            startActivity(intent)
-        }
-
-        // Set Goals button click
-        setGoalsButton.setOnClickListener {
-            val intent = Intent(requireContext(), com.mobdev.baonbuddy.ui.goals.SetGoalActivity::class.java)
-            startActivity(intent)
-        }
-
-        // Load user data
-        loadUserData()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        loadUserData()
-    }
-
-    private fun loadUserData() {
-        val view = view ?: return
+        viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
 
         val userAvatar = view.findViewById<ImageView>(R.id.userAvatar)
         val userName = view.findViewById<TextView>(R.id.userName)
         val balanceAmount = view.findViewById<TextView>(R.id.balanceAmount)
+        val settingsButton = view.findViewById<ImageView>(R.id.settingsButton)
+        val addMoneyButton = view.findViewById<LinearLayout>(R.id.addMoneyButton)
+        val spentMoneyButton = view.findViewById<LinearLayout>(R.id.spentMoneyButton)
+        val setGoalsButton = view.findViewById<LinearLayout>(R.id.setGoalsButton)
         val recentActivityList = view.findViewById<RecyclerView>(R.id.recentActivityList)
 
-        // Load user data from SharedPreferences
-        val sharedPref = requireActivity().getSharedPreferences("BaonBuddyPrefs", Context.MODE_PRIVATE)
-        val name = sharedPref.getString("user_name", "Buddy") ?: "Buddy"
-        val avatarId = sharedPref.getInt("user_avatar", R.drawable.avatar_snail)
-        val balance = sharedPref.getFloat("user_balance", 0f)
+        transactionAdapter = TransactionAdapter(emptyList())
+        recentActivityList.layoutManager = LinearLayoutManager(requireContext())
+        recentActivityList.adapter = transactionAdapter
 
-        // Set user data
-        userName.text = "$name!"
-        userAvatar.setImageResource(avatarId)
-        balanceAmount.text = "₱${String.format("%.2f", balance)}"
+        val swipeHandler = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean = false
 
-        // Load transactions
-        loadTransactions(recentActivityList, sharedPref)
-    }
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                val transaction = transactionAdapter.getTransactionAt(position)
+                viewModel.deleteTransaction(transaction)
+            }
+        }
+        ItemTouchHelper(swipeHandler).attachToRecyclerView(recentActivityList)
 
-    private fun loadTransactions(recentActivityList: RecyclerView, sharedPref: android.content.SharedPreferences) {
-        val transactionsJson = sharedPref.getString("transactions", "[]") ?: "[]"
-
-        val transactions = mutableListOf<Transaction>()
-
-        // Parse JSON manually (simple approach)
-        if (transactionsJson != "[]") {
-            try {
-                val items = transactionsJson
-                    .removeSurrounding("[", "]")
-                    .split("},")
-                    .map { it.trim().removeSuffix("}").removePrefix("{") + "}" }
-
-                for (item in items) {
-                    val titleMatch = Regex(""""title":"([^"]+)"""").find(item)
-                    val dateMatch = Regex(""""date":"([^"]+)"""").find(item)
-                    val amountMatch = Regex(""""amount":(\d+\.?\d*)""").find(item)
-                    val isIncomeMatch = Regex(""""isIncome":(true|false)""").find(item)
-
-                    if (titleMatch != null && dateMatch != null && amountMatch != null && isIncomeMatch != null) {
-                        transactions.add(
-                            Transaction(
-                                title = titleMatch.groupValues[1],
-                                date = dateMatch.groupValues[1],
-                                amount = amountMatch.groupValues[1].toDouble(),
-                                isIncome = isIncomeMatch.groupValues[1].toBoolean()
-                            )
-                        )
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
+        viewModel.user.observe(viewLifecycleOwner) { user ->
+            user?.let {
+                userName.text = "${it.name}!"
+                userAvatar.setImageResource(it.avatarResId)
+                val formatter = NumberFormat.getNumberInstance(Locale.US)
+                formatter.minimumFractionDigits = 2
+                formatter.maximumFractionDigits = 2
+                balanceAmount.text = "₱${formatter.format(it.balance)}"
             }
         }
 
-        // Setup RecyclerView
-        recentActivityList.layoutManager = LinearLayoutManager(requireContext())
-        recentActivityList.adapter = TransactionAdapter(transactions)
+        viewModel.recentTransactions.observe(viewLifecycleOwner) { transactions ->
+            transactionAdapter.updateTransactions(transactions)
+        }
+
+        settingsButton.setOnClickListener {
+            findNavController().navigate(R.id.settingsFragment)
+        }
+
+        addMoneyButton.setOnClickListener {
+            findNavController().navigate(R.id.addMoneyFragment)
+        }
+
+        spentMoneyButton.setOnClickListener {
+            findNavController().navigate(R.id.spentMoneyFragment)
+        }
+
+        setGoalsButton.setOnClickListener {
+            findNavController().navigate(R.id.setGoalFragment)
+        }
     }
 }

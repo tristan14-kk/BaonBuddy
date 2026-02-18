@@ -135,6 +135,7 @@
             android:textSize="12sp"
             android:textAllCaps="false"
             android:background="@drawable/button_outline"
+            app:backgroundTint="@null"
             android:layout_marginTop="12dp" />
 
     </LinearLayout>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/landingFragment">
+
+
+    <fragment
+        android:id="@+id/landingFragment"
+        android:name="com.mobdev.baonbuddy.ui.onboarding.LandingFragment"
+        android:label="Landing"
+        tools:layout="@layout/fragment_landing" />
+
+    <fragment
+        android:id="@+id/getStartedFragment"
+        android:name="com.mobdev.baonbuddy.ui.onboarding.GetStartedFragment"
+        android:label="Get Started"
+        tools:layout="@layout/fragment_get_started" />
+
+    <fragment
+        android:id="@+id/nameInputFragment"
+        android:name="com.mobdev.baonbuddy.ui.onboarding.NameInputFragment"
+        android:label="Enter Name"
+        tools:layout="@layout/fragment_name_input" />
+
+    <fragment
+        android:id="@+id/avatarSelectionFragment"
+        android:name="com.mobdev.baonbuddy.ui.onboarding.AvatarSelectionFragment"
+        android:label="Select Avatar"
+        tools:layout="@layout/fragment_avatar_selection" />
+
+    <!-- MAIN SCREEN (Contains Bottom Navigation) -->
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.mobdev.baonbuddy.ui.main.MainFragment"
+        android:label="Main"
+        tools:layout="@layout/fragment_main" />
+
+</navigation>

@@ -8,21 +8,23 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.mobdev.baonbuddy.R
-import com.mobdev.baonbuddy.data.models.Goal
+import com.mobdev.baonbuddy.data.database.entity.GoalEntity
+import java.text.NumberFormat
+import java.util.*
 
 class GoalAdapter(
-    private val goals: List<Goal>,
-    private val onAddMoneyClick: (Goal) -> Unit
+    private var goals: List<GoalEntity>,
+    private val onGoalClick: (GoalEntity) -> Unit
 ) : RecyclerView.Adapter<GoalAdapter.GoalViewHolder>() {
 
-    class GoalViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val goalName: TextView = view.findViewById(R.id.goalName)
-        val goalDate: TextView = view.findViewById(R.id.goalDate)
-        val goalTarget: TextView = view.findViewById(R.id.goalTarget)
-        val goalProgress: ProgressBar = view.findViewById(R.id.goalProgress)
-        val goalSaved: TextView = view.findViewById(R.id.goalSaved)
-        val goalPercentage: TextView = view.findViewById(R.id.goalPercentage)
-        val addToGoalButton: Button = view.findViewById(R.id.addToGoalButton)
+    class GoalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val goalName: TextView = itemView.findViewById(R.id.goalName)
+        val goalDate: TextView = itemView.findViewById(R.id.goalDate)
+        val goalTarget: TextView = itemView.findViewById(R.id.goalTarget)
+        val goalProgress: ProgressBar = itemView.findViewById(R.id.goalProgress)
+        val goalSaved: TextView = itemView.findViewById(R.id.goalSaved)
+        val goalPercentage: TextView = itemView.findViewById(R.id.goalPercentage)
+        val addToGoalButton: Button = itemView.findViewById(R.id.addToGoalButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GoalViewHolder {
@@ -34,45 +36,33 @@ class GoalAdapter(
     override fun onBindViewHolder(holder: GoalViewHolder, position: Int) {
         val goal = goals[position]
 
+        val formatter = NumberFormat.getNumberInstance(Locale.US)
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 0
+
         holder.goalName.text = goal.name
-        holder.goalTarget.text = "₱${String.format("%,.0f", goal.targetAmount)}"
+        holder.goalDate.text = if (goal.targetDate.isNotEmpty()) "Target: ${goal.targetDate}" else ""
+        holder.goalTarget.text = "₱${formatter.format(goal.targetAmount)}"
+        holder.goalSaved.text = "₱${formatter.format(goal.savedAmount)} saved"
 
-        // Show target date
-        if (goal.targetDate.isNotEmpty()) {
-            holder.goalDate.text = "Target: ${goal.targetDate}"
-            holder.goalDate.visibility = View.VISIBLE
-        } else {
-            holder.goalDate.visibility = View.GONE
-        }
-
-        // Calculate progress
         val progress = if (goal.targetAmount > 0) {
             ((goal.savedAmount / goal.targetAmount) * 100).toInt()
-        } else {
-            0
-        }
+        } else 0
+        holder.goalProgress.progress = progress.coerceIn(0, 100)
+        holder.goalPercentage.text = "${progress.coerceIn(0, 100)}%"
 
-        holder.goalProgress.progress = progress.coerceAtMost(100)
-        holder.goalSaved.text = "₱${String.format("%,.0f", goal.savedAmount)} saved"
-        holder.goalPercentage.text = "${progress.coerceAtMost(100)}%"
-
-        if (progress >= 100) {
-            holder.addToGoalButton.text = "✓ Goal Complete!"
-            holder.addToGoalButton.isEnabled = false
-            holder.addToGoalButton.alpha = 0.5f
-        } else {
-            holder.addToGoalButton.text = "+ Add Money to Goal"
-            holder.addToGoalButton.isEnabled = true
-            holder.addToGoalButton.alpha = 1f
-        }
-
-        // Add money button click
-        holder.addToGoalButton.setOnClickListener {
-            if (progress < 100) {
-                onAddMoneyClick(goal)
-            }
-        }
+        holder.addToGoalButton.setOnClickListener { onGoalClick(goal) }
+        holder.itemView.setOnClickListener { onGoalClick(goal) }
     }
 
-    override fun getItemCount() = goals.size
+    override fun getItemCount(): Int = goals.size
+
+    fun updateGoals(newGoals: List<GoalEntity>) {
+        goals = newGoals
+        notifyDataSetChanged()
+    }
+
+    fun getGoalAt(position: Int): GoalEntity {
+        return goals[position]
+    }
 }

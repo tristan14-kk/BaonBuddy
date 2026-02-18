@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bottom_nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.mobdev.baonbuddy.ui.main.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/statsFragment"
+        android:name="com.mobdev.baonbuddy.ui.main.StatsFragment"
+        android:label="Stats"
+        tools:layout="@layout/fragment_stats" />
+
+    <fragment
+        android:id="@+id/goalsFragment"
+        android:name="com.mobdev.baonbuddy.ui.goals.GoalsFragment"
+        android:label="Goals"
+        tools:layout="@layout/fragment_goals" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.mobdev.baonbuddy.ui.main.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile" />
+
+    <!-- TRANSACTION SCREENS -->
+    <fragment
+        android:id="@+id/addMoneyFragment"
+        android:name="com.mobdev.baonbuddy.ui.transactions.AddMoneyFragment"
+        android:label="Add Money"
+        tools:layout="@layout/fragment_add_money" />
+
+    <fragment
+        android:id="@+id/spentMoneyFragment"
+        android:name="com.mobdev.baonbuddy.ui.transactions.SpentMoneyFragment"
+        android:label="Spent Money"
+        tools:layout="@layout/fragment_spent_money" />
+
+    <fragment
+        android:id="@+id/setGoalFragment"
+        android:name="com.mobdev.baonbuddy.ui.transactions.SetGoalFragment"
+        android:label="Set Goal"
+        tools:layout="@layout/fragment_set_goal" />
+
+    <fragment
+        android:id="@+id/addToGoalFragment"
+        android:name="com.mobdev.baonbuddy.ui.transactions.AddToGoalFragment"
+        android:label="Add to Goal"
+        tools:layout="@layout/fragment_add_to_goal" />
+
+    <!-- SETTINGS SCREENS -->
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.mobdev.baonbuddy.ui.settings.SettingsFragment"
+        android:label="Settings"
+        tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/changeAvatarFragment"
+        android:name="com.mobdev.baonbuddy.ui.settings.ChangeAvatarFragment"
+        android:label="Change Avatar"
+        tools:layout="@layout/fragment_change_avatar" />
+
+    <fragment
+        android:id="@+id/setPinFragment"
+        android:name="com.mobdev.baonbuddy.ui.settings.SetPinFragment"
+        android:label="Set PIN"
+        tools:layout="@layout/fragment_set_pin" />
+
+    <fragment
+        android:id="@+id/helpSupportFragment"
+        android:name="com.mobdev.baonbuddy.ui.settings.HelpSupportFragment"
+        android:label="Help"
+        tools:layout="@layout/fragment_help_support" />
+
+    <fragment
+        android:id="@+id/privacyPolicyFragment"
+        android:name="com.mobdev.baonbuddy.ui.settings.PrivacyPolicyFragment"
+        android:label="Privacy Policy"
+        tools:layout="@layout/fragment_privacy_policy" />
+
+</navigation>

@@ -1,51 +1,31 @@
 package com.mobdev.baonbuddy.ui.main
 
+import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
 import com.mobdev.baonbuddy.R
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
 
-        // Load HomeFragment by default
-        if (savedInstanceState == null) {
-            loadFragment(HomeFragment())
+        val sharedPref = getSharedPreferences("BaonBuddyPrefs", Context.MODE_PRIVATE)
+        val onboardingComplete = sharedPref.getBoolean("onboarding_complete", false)
+
+        if (onboardingComplete) {
+            val navGraph = navController.navInflater.inflate(R.navigation.nav_graph)
+            navGraph.setStartDestination(R.id.mainFragment)
+            navController.graph = navGraph
         }
-
-        // Handle bottom navigation clicks
-        bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.navigation_home -> {
-                    loadFragment(HomeFragment())
-                    true
-                }
-                R.id.navigation_stats -> {
-                    loadFragment(StatsFragment())
-                    true
-                }
-                R.id.navigation_goals -> {
-                    loadFragment(GoalsFragment())
-                    true
-                }
-                R.id.navigation_profile -> {
-                    loadFragment(ProfileFragment())
-                    true
-                }
-                else -> false
-            }
-        }
-    }
-
-    private fun loadFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, fragment)
-            .commit()
     }
 }
